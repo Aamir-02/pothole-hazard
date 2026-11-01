@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: pothole_mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: pothole_hazard
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  backend:
+    build: ./backend
+    container_name: pothole_backend
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongodb:27017/pothole_hazard
+      JWT_SECRET: pothole_hazard_jwt_super_secret_key_2026
+    depends_on:
+      - mongodb
+    restart: always
+
+  admin_dashboard:
+    build:
+      context: ./admin_dashboard
+    container_name: pothole_admin_dashboard
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  mongo_data:
